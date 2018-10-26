@@ -493,8 +493,20 @@ public class SubstructureFingerprinter extends AbstractFingerprinter implements 
 
     /** {@inheritDoc} */
     @Override
-    public Map<String, Integer> getRawFingerprint(IAtomContainer iAtomContainer) throws CDKException {
-        throw new UnsupportedOperationException();
+    public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
+        if (keys.isEmpty()) {
+            throw new CDKException("No substructures were defined");
+        }
+
+        // init SMARTS invariants (connectivity, degree, etc)
+        SmartsPattern.prepare(atomContainer);
+
+        final Map<String, Integer> map = new TreeMap<>();
+        for (Key key: keys) {
+            map.put(key.smarts, key.pattern.matchAll(atomContainer).countUnique());
+        }
+
+        return map;
     }
 
     /** {@inheritDoc} */
